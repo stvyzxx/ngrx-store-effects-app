@@ -25,5 +25,50 @@ export class PizzasEffects {
             catchError(error => of(new pizzasActions.LoadPizzasFail(error)))
           )
       })
+    );
+
+  @Effect()
+  createPizza$ = this.$actions
+    .ofType(pizzasActions.CREATE_PIZZA)
+    .pipe(
+      map((action: pizzasActions.CreatePizza) => action.payload),
+      switchMap(pizza => {
+        return this.pizzasService
+          .createPizza(pizza)
+          .pipe(
+            map(pizza => new pizzasActions.CreatePizzaSuccess(pizza)),
+            catchError(error => of(new pizzasActions.CreatePizzaFail(error)))
+          )
+      })
     )
+
+    @Effect()
+    updatePizza$ = this.$actions
+      .ofType(pizzasActions.UPDATE_PIZZA)
+      .pipe(
+        map((action: pizzasActions.UpdatePizza) => action.payload),
+        switchMap(pizza => {
+          return this.pizzasService
+            .updatePizza(pizza)
+            .pipe(
+              map(pizza => new pizzasActions.UpdatePizzaSuccess(pizza)),
+              catchError(error => of(new pizzasActions.UpdatePizzaFail(error)))
+            )
+        })
+      )
+
+      @Effect()
+      removePizza$ = this.$actions
+        .ofType(pizzasActions.REMOVE_PIZZA)
+        .pipe(
+          map((action: pizzasActions.RemovePizza) => action.payload),
+          switchMap(pizza => {
+            return this.pizzasService
+              .removePizza(pizza)
+              .pipe(
+                map(pizza => new pizzasActions.RemovePizzaSuccess(pizza)),
+                catchError(error => of(new pizzasActions.RemovePizzaFail(error)))
+              )
+          })
+        )
 }

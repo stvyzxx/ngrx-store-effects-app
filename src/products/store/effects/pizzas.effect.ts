@@ -3,6 +3,7 @@ import { Effect, Actions } from '@ngrx/effects';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
 
+import * as fromRoot from '../../../app/store';
 import * as fromServices from '../../services';
 
 import * as pizzasActions from  '../actions/pizzas.action';
@@ -43,6 +44,16 @@ export class PizzasEffects {
     )
 
     @Effect()
+    createPizzaSuccess$ = this.$actions
+      .ofType(pizzasActions.CREATE_PIZZA_SUCCESS)
+      .pipe(
+        map((action: pizzasActions.CreatePizzaSuccess) => action.payload),
+        map(pizza => new fromRoot.Go({
+          path: ['/products', pizza.id]
+        }))
+      );
+
+    @Effect()
     updatePizza$ = this.$actions
       .ofType(pizzasActions.UPDATE_PIZZA)
       .pipe(
@@ -57,18 +68,33 @@ export class PizzasEffects {
         })
       )
 
-      @Effect()
-      removePizza$ = this.$actions
-        .ofType(pizzasActions.REMOVE_PIZZA)
-        .pipe(
-          map((action: pizzasActions.RemovePizza) => action.payload),
-          switchMap(pizza => {
-            return this.pizzasService
-              .removePizza(pizza)
-              .pipe(
-                map(pizza => new pizzasActions.RemovePizzaSuccess(pizza)),
-                catchError(error => of(new pizzasActions.RemovePizzaFail(error)))
-              )
+    @Effect()
+    removePizza$ = this.$actions
+      .ofType(pizzasActions.REMOVE_PIZZA)
+      .pipe(
+        map((action: pizzasActions.RemovePizza) => action.payload),
+        switchMap(pizza => {
+          return this.pizzasService
+            .removePizza(pizza)
+            .pipe(
+              map(pizza => new pizzasActions.RemovePizzaSuccess(pizza)),
+              catchError(error => of(new pizzasActions.RemovePizzaFail(error)))
+            )
+        })
+      )
+
+    @Effect()
+    handlePizzaSuccess$ = this.$actions
+      .ofType(
+        pizzasActions.UPDATE_PIZZA_SUCCESS,
+        pizzasActions.REMOVE_PIZZA_SUCCESS
+      )
+      .pipe(
+        map(pizza => {
+          return new fromRoot.Go({
+            path: ['/products']
           })
-        )
+        })
+      )
+
 }
